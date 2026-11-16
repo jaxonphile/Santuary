@@ -1,0 +1,35 @@
+services:
+  oracle:
+    image: gvenzl/oracle-xe:21-slim
+    container_name: santuary-oracle
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+    ports:
+      - "1521:1521"
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    healthcheck:
+      test: ["CMD", "/opt/oracle/checkDBStatus.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
+
+  backend:
+    build: ./backend
+    env_file: .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      oracle:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  oracle-data:
