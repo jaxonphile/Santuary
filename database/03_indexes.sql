@@ -1,9 +1,3 @@
-BEGIN
-  DBMS_STATS.GATHER_TABLE_STATS(USER, 'CERITA');
-END;
-
-
-EXPLAIN PLAN FOR
-SELECT id, judul FROM cerita WHERE kategori_id = 3 ORDER BY dibuat_pada;
-
-SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);
+-- 03_indexes.sql
+CREATE INDEX idx_cerita_kategori_tanggal ON cerita (kategori_id, dibuat_pada);
+CREATE INDEX idx_rujukan_lembaga ON rujukan (lembaga_id);
