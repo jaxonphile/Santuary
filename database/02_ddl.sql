@@ -28,4 +28,34 @@ BEGIN
       MOD(i, 5) + 1,
       'Cerita uji ' || i,
       'Isi cerita uji nomor ' || i || '. Data ini hanya untuk pengujian.',
-      CASE MOD(i, 3) WHEN 0 THEN 'BERCERITA' WHEN 1 THEN 'DUKUNGAN'
+      CASE MOD(i, 3) WHEN 0 THEN 'BERCERITA' WHEN 1 THEN 'DUKUNGAN' ELSE 'LAPORAN' END,
+      CASE WHEN MOD(i, 7) = 0 THEN 1 ELSE 0 END,
+      'DISETUJUI',
+      SYSTIMESTAMP - NUMTODSINTERVAL(TRUNC(DBMS_RANDOM.VALUE(0, 365)), 'DAY')
+    );
+  END LOOP;
+  COMMIT;
+END;
+/
+
+-- 10.000 rujukan dari cerita kelipatan 5
+INSERT INTO rujukan (cerita_id, lembaga_id, status, dirujuk_pada)
+SELECT id, MOD(id, 2) + 1, 'DITERIMA', dibuat_pada + 1
+FROM cerita
+WHERE MOD(id, 5) = 0;
+
+INSERT INTO persetujuan (cerita_id, jenis_persetujuan, disetujui_pada)
+SELECT cerita_id, 'LAPORAN_FORMAL', dirujuk_pada
+FROM rujukan;
+
+-- 15.000 log status
+INSERT INTO log_status (rujukan_id, status_lama, status_baru, diubah_pada)
+SELECT id, NULL, 'DITERIMA', dirujuk_pada
+FROM rujukan;
+
+INSERT INTO log_status (rujukan_id, status_lama, status_baru, diubah_pada)
+SELECT id, 'DITERIMA', 'DIPROSES', dirujuk_pada + 2
+FROM rujukan
+WHERE MOD(id, 2) = 0;
+
+COMMIT;
