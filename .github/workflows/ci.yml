@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main, route-making]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Cek backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Ambil kode
+        uses: actions/checkout@v4
+
+      - name: Siapkan Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Pasang dependensi
+        run: npm ci
+
+      - name: Cek sintaks & tes ringan
+        run: npm test
+
+  keamanan:
+    name: Cek keamanan dasar
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ambil kode
+        uses: actions/checkout@v4
+
+      - name: Pastikan .env tidak ter-commit
+        run: |
+          if git ls-files --error-unmatch .env >/dev/null 2>&1; then
+            echo "GAGAL: file .env ikut ter-commit."
+            exit 1
+          fi
+          echo "AMAN: .env tidak ada di repository."
+
+      - name: Pastikan dokumen utama tidak kosong
+        run: |
+          for berkas in docs/PRD.md docs/SRS.md; do
+            if [ ! -s "$berkas" ]; then
+              echo "GAGAL: $berkas masih kosong."
+              exit 1
+            fi
+          done
+          echo "AMAN: PRD dan SRS tidak kosong."
