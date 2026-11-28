@@ -370,6 +370,60 @@ a {
   flex-shrink: 0;
 }
 
+/* Batasan layanan */
+.disclaimer {
+  background: #fff6ef;
+  border-top: 1px solid #f0ded0;
+  border-bottom: 1px solid #f0ded0;
+}
+
+.disclaimer-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 17px 0;
+  font-size: 0.86rem;
+  color: #6b5a4e;
+}
+
+.disclaimer-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #f6e3d6;
+  color: #9b5c3c;
+}
+
+.disclaimer-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.disclaimer-inner p {
+  flex: 1;
+  line-height: 1.6;
+}
+
+.disclaimer-inner strong {
+  color: #6d442d;
+}
+
+.disclaimer-inner a {
+  flex-shrink: 0;
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.disclaimer-inner a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
 /* Visual hero tanpa gambar eksternal */
 .hero-visual {
   position: relative;
@@ -837,6 +891,15 @@ a {
   line-height: 1.78;
 }
 
+.emergency p + p {
+  margin-top: 14px;
+}
+
+.emergency-disclaimer {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.62) !important;
+}
+
 .emergency-actions {
   align-items: center;
 }
@@ -954,6 +1017,178 @@ a {
 
 .footer-bottom a:hover {
   color: #fff;
+}
+
+/* Panel bantuan persisten */
+.help-dock {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.help-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.help-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 17px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+  box-shadow: 0 12px 30px rgba(22, 71, 63, 0.28);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.help-trigger::-webkit-details-marker {
+  display: none;
+}
+
+.help-trigger:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.help-trigger svg {
+  width: 18px;
+  height: 18px;
+}
+
+.help-panel[open] .help-trigger {
+  background: var(--primary-dark);
+}
+
+.help-card {
+  order: -1;
+  width: min(348px, calc(100vw - 36px));
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: 0 26px 70px rgba(22, 71, 63, 0.2);
+  animation: help-in 0.22s ease both;
+}
+
+@keyframes help-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.help-kicker {
+  margin-bottom: 8px;
+  color: var(--primary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.help-card h2 {
+  margin-bottom: 18px;
+  font-size: 1.25rem;
+  letter-spacing: -0.035em;
+}
+
+.help-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.help-list li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+}
+
+.help-number {
+  display: flex;
+  flex-direction: column;
+  min-width: 44px;
+  color: var(--primary);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.help-number small {
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 600;
+}
+
+.help-number-text {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+.help-list strong {
+  display: block;
+  font-size: 0.88rem;
+}
+
+.help-list div small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.help-list a {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.help-list a:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.help-disclaimer {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.help-exit {
+  margin-top: 12px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--warn);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
 }
 
 /* ---------------------------------------------------------
@@ -1138,6 +1373,28 @@ a {
   .footer-bottom {
     flex-direction: column;
     gap: 10px;
+  }
+
+  .disclaimer-inner {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .disclaimer-inner p {
+    flex-basis: calc(100% - 40px);
+  }
+
+  .disclaimer-inner a {
+    margin-left: 38px;
+  }
+
+  .help-dock {
+    right: 16px;
+    bottom: 16px;
+  }
+
+  .help-card {
+    padding: 20px;
   }
 }
 

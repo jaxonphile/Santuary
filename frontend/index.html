@@ -106,6 +106,21 @@
       </div>
     </section>
 
+    <!-- BATASAN LAYANAN -->
+    <section class="disclaimer" aria-label="Batasan layanan">
+      <div class="container disclaimer-inner">
+        <span class="disclaimer-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.6"/><path d="M10 9v4.5M10 6.3h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </span>
+        <p>
+          <strong>Catatan layanan:</strong> santuary bukan pengganti layanan
+          psikologis, medis, atau penegakan hukum. Kami hanya ruang untuk
+          didengar dan saling menguatkan.
+        </p>
+        <a href="#darurat">Lihat bantuan <span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
     <!-- TENTANG -->
     <section class="section about" id="tentang">
       <div class="container about-grid">
@@ -211,14 +226,18 @@
           <p class="eyebrow eyebrow-light">Bantuan darurat</p>
           <h2 id="darurat-title">Butuh bantuan <em>sekarang?</em></h2>
           <p>
-            Jika Anda atau seseorang dalam bahaya segera, hubungi layanan
-            darurat setempat. Jika tidak aman untuk tetap membuka halaman ini,
-            gunakan tombol keluar cepat.
+            Untuk krisis psikologis, hubungi <strong>119 ekstensi 8</strong>.
+            Untuk kekerasan dan perlindungan, hubungi <strong>SAPA 129</strong>.
+            Pelaporan di kampus dapat disampaikan ke <strong>Satgas PPKPT USK</strong>.
+          </p>
+          <p class="emergency-disclaimer">
+            santuary bukan pengganti layanan psikologis, medis, atau penegakan hukum.
+            Jika tidak aman untuk tetap membuka halaman ini, gunakan tombol keluar cepat.
           </p>
         </div>
         <div class="emergency-actions">
-          <a class="btn btn-light" href="tel:119">Hubungi 119</a>
-          <a class="btn btn-light-outline" href="#tentang">Kontak konseling</a>
+          <a class="btn btn-light" href="tel:119">Hubungi 119 ekst. 8</a>
+          <a class="btn btn-light-outline" href="tel:129">Hubungi SAPA 129</a>
           <button class="quick-exit" type="button" data-quick-exit>
             Keluar cepat <span aria-hidden="true">↗</span>
           </button>
@@ -280,10 +299,52 @@
     </div>
   </footer>
 
+  <!-- PANEL BANTUAN PERSISTEN -->
+  <aside class="help-dock" aria-label="Panel bantuan">
+    <details class="help-panel">
+      <summary class="help-trigger">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M10 17s-6-3.7-6-8a3.4 3.4 0 0 1 6-2.1A3.4 3.4 0 0 1 16 9c0 4.3-6 8-6 8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+        <span>Bantuan</span>
+      </summary>
+
+      <div class="help-card">
+        <p class="help-kicker">Ruang bantuan selalu dekat</p>
+        <h2>Anda tidak harus kuat sendiri.</h2>
+
+        <ul class="help-list">
+          <li>
+            <span class="help-number">119<small>ekst. 8</small></span>
+            <div><strong>Krisis psikologis</strong><small>Layanan darurat 24 jam</small></div>
+            <a href="tel:119">Hubungi</a>
+          </li>
+          <li>
+            <span class="help-number">129</span>
+            <div><strong>SAPA 129</strong><small>Kekerasan &amp; perlindungan</small></div>
+            <a href="tel:129">Hubungi</a>
+          </li>
+          <li>
+            <span class="help-number help-number-text">USK</span>
+            <div><strong>Satgas PPKPT USK</strong><small>Pelaporan di lingkungan kampus</small></div>
+            <a href="#tentang">Info</a>
+          </li>
+        </ul>
+
+        <p class="help-disclaimer">
+          santuary bukan pengganti layanan psikologis, medis, atau penegakan hukum.
+        </p>
+        <button class="help-exit" type="button" data-quick-exit>Keluar cepat ↗</button>
+      </div>
+    </details>
+  </aside>
+
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
-    document.querySelector('[data-quick-exit]').addEventListener('click', function () {
-      window.location.replace('https://www.google.com');
+    document.querySelectorAll('[data-quick-exit]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        window.location.replace('https://www.google.com');
+      });
     });
   </script>
 </body>
