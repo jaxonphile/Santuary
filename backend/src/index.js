@@ -39,6 +39,19 @@ const NAMA_KATEGORI = {
     sosial: 'Pengucilan sosial'
 };
 
+const KATEGORI_KEY = Object.fromEntries(
+    Object.entries(NAMA_KATEGORI).map(([kunci, nama]) => [nama, kunci])
+);
+
+function waktuRelatif(tanggal) {
+    const menit = Math.floor((Date.now() - new Date(tanggal).getTime()) / 60000);
+    if (menit < 1) return 'baru saja';
+    if (menit < 60) return menit + ' menit lalu';
+    const jam = Math.floor(menit / 60);
+    if (jam < 24) return jam + ' jam lalu';
+    return Math.floor(jam / 24) + ' hari lalu';
+}
+
 app.get('/health', async (req, res) => {
     let conn;
     try {
@@ -251,6 +264,53 @@ app.post('/api/cerita', verifikasiToken, async (req, res) => {
         res.status(500).json({
             status: 'error',
             pesan: 'Gagal membuat cerita'
+        });
+    } finally {
+        if (conn) await conn.close();
+    }
+});
+
+app.get('/api/cerita', async (req, res) => {
+    let conn;
+    try {
+        conn = await ambilKoneksi();
+        const hasil = await conn.execute(
+            `SELECT c.id AS "id",
+                    c.judul AS "judul",
+                    c.isi AS "isi",
+                    u.nama_samaran AS "nama",
+                    k.nama_kategori AS "nama_kategori",
+                    c.tingkat_keterlibatan AS "tingkat",
+                    c.label_sensitif AS "label_sensitif",
+                    c.dibuat_pada AS "dibuat_pada",
+                    (SELECT COUNT(*) FROM komentar km
+                     WHERE km.cerita_id = c.id) AS "dukungan"
+             FROM cerita c
+             JOIN pengguna u ON u.id = c.pengguna_id
+             JOIN kategori_bullying k ON k.id = c.kategori_id
+             WHERE c.status_moderasi = 'DISETUJUI'
+             ORDER BY c.dibuat_pada DESC
+             FETCH FIRST 20 ROWS ONLY`
+        );
+
+        const data = hasil.rows.map((baris) => ({
+            id: baris.id,
+            judul: baris.judul,
+            isi: baris.isi,
+            nama: baris.nama,
+            kategori: KATEGORI_KEY[baris.nama_kategori] || 'verbal',
+            tingkat: baris.tingkat,
+            sensitif: Number(baris.label_sensitif) === 1,
+            dukungan: Number(baris.dukungan),
+            waktu: waktuRelatif(baris.dibuat_pada)
+        }));
+
+        res.status(200).json({ status: 'ok', data: data });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: 'error',
+            pesan: 'Gagal memuat cerita'
         });
     } finally {
         if (conn) await conn.close();
