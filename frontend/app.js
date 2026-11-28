@@ -379,3 +379,58 @@ if (new URLSearchParams(window.location.search).has('layanan')) {
 
   sinkronExtra();
 })();
+
+/* =========================================================
+   Mode terang/gelap
+   Pilihan disimpan di localStorage dan dipakai di semua halaman.
+   ========================================================= */
+
+(function () {
+  'use strict';
+
+  var root = document.documentElement;
+  var tombol = document.querySelectorAll('[data-theme-toggle]');
+  var label = document.querySelectorAll('[data-theme-label]');
+  var meta = document.querySelector('meta[name="theme-color"]');
+  var WARNA = { light: '#F5F2EA', dark: '#171F1A' };
+
+  function terapkan(tema, simpan) {
+    root.setAttribute('data-theme', tema);
+
+    if (meta) {
+      meta.setAttribute('content', WARNA[tema]);
+    }
+
+    var gelap = tema === 'dark';
+    tombol.forEach(function (button) {
+      button.setAttribute('aria-pressed', String(gelap));
+      button.setAttribute('aria-label', gelap ? 'Ganti mode terang' : 'Ganti mode gelap');
+    });
+    label.forEach(function (span) {
+      span.textContent = gelap ? 'Mode terang' : 'Mode gelap';
+    });
+
+    if (simpan) {
+      try {
+        localStorage.setItem('santuary-theme', tema);
+      } catch (e) {
+        // localStorage tidak tersedia: tema tetap berlaku untuk sesi ini.
+      }
+    }
+  }
+
+  terapkan(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light', false);
+
+  tombol.forEach(function (button) {
+    button.addEventListener('click', function () {
+      terapkan(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark', true);
+    });
+  });
+
+  window.addEventListener('storage', function (event) {
+    if (event.key === 'santuary-theme' &&
+        (event.newValue === 'light' || event.newValue === 'dark')) {
+      terapkan(event.newValue, false);
+    }
+  });
+})();

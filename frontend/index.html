@@ -3,8 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f7f5f0">
+  <meta name="theme-color" content="#F5F2EA">
   <meta name="description" content="Santuary adalah ruang aman anonim untuk korban bullying di sekolah dan kampus. Bercerita, dapatkan dukungan, dan tentukan langkahmu sendiri.">
+  <script>
+    (function () {
+      try {
+        var tersimpan = localStorage.getItem('santuary-theme');
+        var tema = tersimpan || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', tema);
+      } catch (e) {}
+    })();
+  </script>
   <title>Santuary — Ruang aman untuk saling menguatkan</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,6 +49,11 @@
           Bantuan darurat
         </a>
         <span class="nav-spacer" aria-hidden="true"></span>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Ganti mode gelap" aria-pressed="false">
+          <svg class="icon-moon" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M16.5 12.4A6.8 6.8 0 0 1 7.6 3.5a6.8 6.8 0 1 0 8.9 8.9Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+          <svg class="icon-sun" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="3.4" stroke="currentColor" stroke-width="1.6"/><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M15.7 4.3l-1.4 1.4M5.7 14.3l-1.4 1.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <span data-theme-label>Mode gelap</span>
+        </button>
         <a class="btn btn-ghost btn-sm" href="#masuk">Masuk</a>
         <a class="btn btn-primary btn-sm" href="#daftar">Daftar</a>
       </nav>
