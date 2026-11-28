@@ -1,0 +1,30 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  paket:
+    name: Siapkan paket rilis
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ambil kode
+        uses: actions/checkout@v4
+
+      - name: Susun direktori rilis
+        run: |
+          mkdir -p build/backend
+          cp -R frontend build/frontend
+          cp backend/src backend/package.json backend/package-lock.json build/backend/
+          cp docker-compose.yml .env.example build/
+
+      - name: Unggah artefak
+        uses: actions/upload-artifact@v4
+        with:
+          name: santuary-build
+          path: build/
+          if-no-files-found: error
