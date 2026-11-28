@@ -8,6 +8,37 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+function verifikasiToken(req, res, next) {
+    const header = req.headers.authorization || '';
+    const [skema, token] = header.split(' ');
+
+    if (skema !== 'Bearer' || !token) {
+        return res.status(401).json({
+            status: 'error',
+            pesan: 'Token tidak diberikan'
+        });
+    }
+
+    try {
+        req.pengguna = jwt.verify(token, process.env.JWT_SECRET);
+        next();
+    } catch (err) {
+        console.log('JWT error:', err.message);
+        return res.status(401).json({
+            status: 'error',
+            pesan: 'Token tidak valid atau kedaluwarsa'
+        });
+    }
+}
+
+const NAMA_KATEGORI = {
+    verbal: 'Perundungan verbal',
+    fisik: 'Perundungan fisik',
+    siber: 'Perundungan siber',
+    seksual: 'Pelecehan seksual',
+    sosial: 'Pengucilan sosial'
+};
+
 app.get('/health', async (req, res) => {
     let conn;
     try {
@@ -134,6 +165,92 @@ app.post('/api/auth/masuk', async (req, res) => {
         res.status(500).json({
             status: 'error',
             pesan: 'Gagal masuk'
+        });
+    } finally {
+        if (conn) await conn.close();
+    }
+});
+
+app.get('/api/auth/saya', verifikasiToken, (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        pengguna: req.pengguna
+    });
+});
+
+app.post('/api/cerita', verifikasiToken, async (req, res) => {
+    let conn;
+    try {
+        const { judul, isi, kategori, tingkat, sensitif } = req.body;
+        const privasi = req.body.privasi || 'PUBLIK';
+
+        if (!judul || !isi || !kategori || !tingkat) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'judul, isi, kategori, dan tingkat wajib diisi'
+            });
+        }
+        if (!['BERCERITA', 'DUKUNGAN', 'LAPORAN'].includes(tingkat)) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'tingkat tidak dikenal'
+            });
+        }
+        if (!['PUBLIK', 'TERBATAS'].includes(privasi)) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'privasi tidak dikenal'
+            });
+        }
+
+        const namaKategori = NAMA_KATEGORI[kategori];
+        if (!namaKategori) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'kategori tidak dikenal'
+            });
+        }
+
+        conn = await ambilKoneksi();
+        const kat = await conn.execute(
+            `SELECT id AS "id" FROM kategori_bullying WHERE nama_kategori = :nama`,
+            { nama: namaKategori }
+        );
+
+        if (!kat.rows[0]) {
+            return res.status(500).json({
+                status: 'error',
+                pesan: 'Kategori belum ada di database'
+            });
+        }
+
+        await conn.execute(
+            `INSERT INTO cerita
+                (pengguna_id, kategori_id, judul, isi,
+                 tingkat_keterlibatan, label_sensitif, status_moderasi)
+             VALUES
+                (:pengguna, :kategori, :judul, :isi,
+                 :tingkat, :sensitif, 'MENUNGGU')`,
+            {
+                pengguna: req.pengguna.id,
+                kategori: kat.rows[0].id,
+                judul: judul,
+                isi: isi,
+                tingkat: tingkat,
+                sensitif: sensitif === true || sensitif === 'true' ? 1 : 0
+            },
+            { autoCommit: true }
+        );
+
+        res.status(201).json({
+            status: 'ok',
+            pesan: 'Cerita berhasil dikirim dan menunggu moderasi'
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: 'error',
+            pesan: 'Gagal membuat cerita'
         });
     } finally {
         if (conn) await conn.close();
