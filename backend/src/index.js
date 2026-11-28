@@ -240,10 +240,10 @@ app.post('/api/cerita', verifikasiToken, async (req, res) => {
         await conn.execute(
             `INSERT INTO cerita
                 (pengguna_id, kategori_id, judul, isi,
-                 tingkat_keterlibatan, label_sensitif, status_moderasi)
-             VALUES
+                tingkat_keterlibatan, label_sensitif, status_moderasi)
+            VALUES
                 (:pengguna, :kategori, :judul, :isi,
-                 :tingkat, :sensitif, 'MENUNGGU')`,
+                :tingkat, :sensitif, 'MENUNGGU')`,
             {
                 pengguna: req.pengguna.id,
                 kategori: kat.rows[0].id,
@@ -264,6 +264,134 @@ app.post('/api/cerita', verifikasiToken, async (req, res) => {
         res.status(500).json({
             status: 'error',
             pesan: 'Gagal membuat cerita'
+        });
+    } finally {
+        if (conn) await conn.close();
+    }
+});
+
+app.post('/api/cerita/:id/komentar', verifikasiToken, async (req, res) => {
+    let conn;
+    try {
+        const { isi } = req.body;
+        const ceritaId = Number(req.params.id);
+
+        if (!isi || String(isi).trim().length === 0) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'isi komentar wajib diisi'
+            });
+        }
+        if (String(isi).length > 1000) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'isi komentar maksimal 1000 karakter'
+            });
+        }
+
+        conn = await ambilKoneksi();
+        const cek = await conn.execute(
+            `SELECT id AS "id" FROM cerita
+             WHERE id = :id AND status_moderasi = 'DISETUJUI'`,
+            { id: ceritaId }
+        );
+
+        if (!cek.rows[0]) {
+            return res.status(404).json({
+                status: 'error',
+                pesan: 'Cerita tidak ditemukan atau belum disetujui'
+            });
+        }
+
+        await conn.execute(
+            `INSERT INTO komentar (cerita_id, pengguna_id, isi)
+             VALUES (:cerita, :pengguna, :isi)`,
+            {
+                cerita: ceritaId,
+                pengguna: req.pengguna.id,
+                isi: String(isi).trim()
+            },
+            { autoCommit: true }
+        );
+
+        res.status(201).json({
+            status: 'ok',
+            pesan: 'Komentar dukungan berhasil dikirim'
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: 'error',
+            pesan: 'Gagal mengirim komentar'
+        });
+    } finally {
+        if (conn) await conn.close();
+    }
+});
+
+app.post('/api/laporan-konten', verifikasiToken, async (req, res) => {
+    let conn;
+    try {
+        const { alasan } = req.body;
+        const ceritaId = req.body.cerita_id ? Number(req.body.cerita_id) : null;
+        const komentarId = req.body.komentar_id ? Number(req.body.komentar_id) : null;
+
+        if (!alasan || String(alasan).trim().length === 0) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'alasan wajib diisi'
+            });
+        }
+        if (!ceritaId && !komentarId) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'cerita_id atau komentar_id wajib diisi'
+            });
+        }
+
+        conn = await ambilKoneksi();
+        const cek = ceritaId
+            ? await conn.execute(
+                `SELECT id AS "id" FROM laporan_konten
+                 WHERE pelapor_id = :pelapor AND cerita_id = :target`,
+                { pelapor: req.pengguna.id, target: ceritaId }
+            )
+            : await conn.execute(
+                `SELECT id AS "id" FROM laporan_konten
+                 WHERE pelapor_id = :pelapor AND komentar_id = :target`,
+                { pelapor: req.pengguna.id, target: komentarId }
+            );
+
+        if (cek.rows[0]) {
+            return res.status(409).json({
+                status: 'error',
+                pesan: 'Konten ini sudah kamu laporkan'
+            });
+        }
+
+        await conn.execute(
+            `INSERT INTO laporan_konten
+                (pelapor_id, cerita_id, komentar_id, alasan)
+             VALUES
+                (:pelapor, :cerita, :komentar, :alasan)`,
+            {
+                pelapor: req.pengguna.id,
+                cerita: ceritaId,
+                komentar: komentarId,
+                alasan: String(alasan).trim().slice(0, 255)
+            },
+            { autoCommit: true }
+        );
+
+        res.status(201).json({
+            status: 'ok',
+            pesan: 'Laporan terkirim. Moderator akan meninjaunya.'
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: 'error',
+            pesan: 'Gagal mengirim laporan'
         });
     } finally {
         if (conn) await conn.close();
