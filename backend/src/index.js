@@ -20,6 +20,16 @@ app.get('/health', async (req, res) => {
     }
 });
 
+app.get('/api/layanan', (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        data: [
+            { nama: '119 ekstensi 8', keterangan: 'Krisis psikologis' },
+            { nama: 'SAPA 129', keterangan: 'Kekerasan dan perlindungan' }
+        ]
+    });
+});
+
 const PORT = process.env.PORT || 3000;
 
 mulaiPool().then(() => {
