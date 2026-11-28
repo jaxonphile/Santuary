@@ -398,6 +398,80 @@ app.post('/api/laporan-konten', verifikasiToken, async (req, res) => {
     }
 });
 
+app.patch('/api/moderasi/cerita/:id', verifikasiToken, async (req, res) => {
+    let conn;
+    try {
+        if (!['MODERATOR', 'ADMIN'].includes(req.pengguna.peran)) {
+            return res.status(403).json({
+                status: 'error',
+                pesan: 'Hanya moderator yang dapat melakukan ini'
+            });
+        }
+
+        const { aksi, alasan } = req.body;
+        const statusMap = {
+            SETUJUI: 'DISETUJUI',
+            SEMBUNYIKAN: 'DISEMBUNYIKAN',
+            HAPUS: 'DIHAPUS'
+        };
+        const statusBaru = statusMap[aksi];
+
+        if (!statusBaru) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'aksi tidak dikenal'
+            });
+        }
+        if (aksi !== 'SETUJUI' && (!alasan || String(alasan).trim().length === 0)) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'alasan wajib diisi'
+            });
+        }
+
+        conn = await ambilKoneksi();
+        const ubah = await conn.execute(
+            `UPDATE cerita SET status_moderasi = :status WHERE id = :id`,
+            { status: statusBaru, id: Number(req.params.id) }
+        );
+
+        if (ubah.rowsAffected === 0) {
+            return res.status(404).json({
+                status: 'error',
+                pesan: 'Cerita tidak ditemukan'
+            });
+        }
+
+        await conn.execute(
+            `INSERT INTO log_moderasi (cerita_id, moderator_id, aksi, alasan)
+             VALUES (:cerita, :moderator, :aksi, :alasan)`,
+            {
+                cerita: Number(req.params.id),
+                moderator: req.pengguna.id,
+                aksi: statusBaru,
+                alasan: alasan ? String(alasan).trim().slice(0, 255) : null
+            }
+        );
+
+        await conn.commit();
+
+        res.status(200).json({
+            status: 'ok',
+            pesan: 'Moderasi berhasil',
+            status_moderasi: statusBaru
+        });
+    } catch (err) {
+        if (conn) await conn.rollback();
+        console.error(err);
+        res.status(500).json({
+            status: 'error',
+            pesan: 'Gagal melakukan moderasi'
+        });
+    } finally {
+        if (conn) await conn.close();
+    }
+});
+
 app.get('/api/cerita', async (req, res) => {
     let conn;
     try {
