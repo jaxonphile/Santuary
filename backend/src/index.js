@@ -472,6 +472,62 @@ app.patch('/api/moderasi/cerita/:id', verifikasiToken, async (req, res) => {
     }
 });
 
+app.get('/api/cerita/:id', async (req, res) => {
+    let conn;
+    try {
+        const id = Number(req.params.id);
+        if (!Number.isInteger(id) || id <= 0) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'id cerita tidak valid'
+            });
+        }
+
+        conn = await ambilKoneksi();
+        const hasil = await conn.execute(
+            `SELECT c.id AS "id",
+                    c.judul AS "judul",
+                    c.isi AS "isi",
+                    c.label_sensitif AS "label_sensitif"
+             FROM cerita c
+             WHERE c.id = :id AND c.status_moderasi = 'DISETUJUI'`,
+            { id: id }
+        );
+
+        const baris = hasil.rows[0];
+        if (!baris) {
+            return res.status(404).json({
+                status: 'error',
+                pesan: 'Cerita tidak ditemukan'
+            });
+        }
+
+        const sensitif = Number(baris.label_sensitif) === 1;
+        const dibuka = req.query.buka === '1';
+
+        res.status(200).json({
+            status: 'ok',
+            data: {
+                id: baris.id,
+                judul: baris.judul,
+                sensitif: sensitif,
+                isi: sensitif && !dibuka ? null : baris.isi,
+                pesan: sensitif && !dibuka
+                    ? 'Konten sensitif. Tambahkan ?buka=1 setelah pembaca memilih untuk membukanya.'
+                    : null
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: 'error',
+            pesan: 'Gagal memuat cerita'
+        });
+    } finally {
+        if (conn) await conn.close();
+    }
+});
+
 app.get('/api/cerita', async (req, res) => {
     let conn;
     try {
@@ -498,7 +554,7 @@ app.get('/api/cerita', async (req, res) => {
         const data = hasil.rows.map((baris) => ({
             id: baris.id,
             judul: baris.judul,
-            isi: baris.isi,
+            isi: Number(baris.label_sensitif) === 1 ? null : baris.isi,
             nama: baris.nama,
             kategori: KATEGORI_KEY[baris.nama_kategori] || 'verbal',
             tingkat: baris.tingkat,
