@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5f0">
+  <meta name="description" content="Tulis cerita anonim di Santuary. Tidak perlu nama asli, tidak perlu langsung membuat laporan formal.">
+  <title>Tulis cerita — Santuary</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Lewati ke konten utama</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="index.html" aria-label="Santuary, kembali ke beranda">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M16 4c-5.5 0-10 4.3-10 9.7 0 6.6 8.2 13.5 9.6 14.6.4.3 1 .3 1.4 0C17.8 27.2 26 20.3 26 13.7 26 8.3 21.5 4 16 4Z" stroke="currentColor" stroke-width="2"/>
+            <path d="M11.5 14.2h3l1.4-3 2.1 6 1.3-3h1.7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="brand-name">Santuary</span>
+      </a>
+
+      <input class="nav-toggle" type="checkbox" id="nav-toggle" aria-label="Buka atau tutup menu navigasi">
+      <label class="nav-toggle-label" for="nav-toggle" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </label>
+
+      <nav class="site-nav" aria-label="Navigasi utama">
+        <a href="index.html#tentang">Tentang kami</a>
+        <a href="index.html#cerita">Cerita hari ini</a>
+        <a class="nav-emergency" href="index.html#darurat">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          Bantuan darurat
+        </a>
+        <span class="nav-spacer" aria-hidden="true"></span>
+        <a class="btn btn-ghost btn-sm" href="index.html#daftar">Masuk</a>
+        <a class="btn btn-primary btn-sm" href="index.html#daftar">Daftar</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section form-page">
+      <div class="container form-layout">
+        <div class="form-main">
+          <p class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span>Ruang bercerita</p>
+          <h1>Ceritakan dengan <em>caramu sendiri.</em></h1>
+          <p class="form-intro">
+            Tidak perlu nama asli. Kamu yang menentukan apa yang dibagikan,
+            siapa yang boleh membaca, dan apa langkah berikutnya.
+          </p>
+
+          <form id="cerita-form" class="story-form" novalidate>
+            <div class="form-field">
+              <label for="judul">Judul cerita <span class="required" aria-hidden="true">*</span></label>
+              <input id="judul" name="judul" type="text" maxlength="200" required
+                     placeholder="Contoh: Hari itu di grup kelas">
+              <div class="field-foot">
+                <small class="error-text" data-error-for="judul"></small>
+                <small class="counter" id="judul-counter">0/200</small>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="isi">Isi cerita <span class="required" aria-hidden="true">*</span></label>
+              <textarea id="isi" name="isi" rows="8" maxlength="5000" required
+                        placeholder="Tulis seberapa nyaman kamu. Tidak harus lengkap, tidak harus runut."></textarea>
+              <div class="field-foot">
+                <small class="error-text" data-error-for="isi"></small>
+                <small class="counter" id="isi-counter">0/5000</small>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="kategori">Kategori <span class="required" aria-hidden="true">*</span></label>
+              <select id="kategori" name="kategori" required>
+                <option value="">Pilih kategori yang paling mendekati</option>
+                <option value="verbal">Perundungan verbal</option>
+                <option value="fisik">Perundungan fisik</option>
+                <option value="siber">Perundungan siber</option>
+                <option value="seksual">Pelecehan seksual</option>
+                <option value="sosial">Pengucilan sosial</option>
+              </select>
+              <div class="field-foot"><small class="error-text" data-error-for="kategori"></small></div>
+            </div>
+
+            <fieldset class="form-field choice-group">
+              <legend>Tingkat keterlibatan <span class="required" aria-hidden="true">*</span></legend>
+              <div class="choice-grid">
+                <label class="choice-card">
+                  <input type="radio" name="tingkat" value="BERCERITA" required>
+                  <span class="choice-body">
+                    <strong>Bercerita saja</strong>
+                    <small>Tanpa laporan formal. Cerita tetap anonim.</small>
+                  </span>
+                </label>
+                <label class="choice-card">
+                  <input type="radio" name="tingkat" value="DUKUNGAN">
+                  <span class="choice-body">
+                    <strong>Minta dukungan</strong>
+                    <small>Ingin didampingi konselor atau sesama mahasiswa.</small>
+                  </span>
+                </label>
+                <label class="choice-card">
+                  <input type="radio" name="tingkat" value="LAPORAN">
+                  <span class="choice-body">
+                    <strong>Laporan formal</strong>
+                    <small>Langkah resmi, hanya saat kamu sudah siap.</small>
+                  </span>
+                </label>
+              </div>
+              <div class="field-foot"><small class="error-text" data-error-for="tingkat"></small></div>
+            </fieldset>
+
+            <div class="form-field check-field">
+              <label class="check-row">
+                <input type="checkbox" id="sensitif" name="sensitif">
+                <span>
+                  <strong>Tandai sebagai konten sensitif</strong>
+                  <small>Cerita akan tersembunyi sampai pembaca menekan tombol untuk membukanya.</small>
+                </span>
+              </label>
+            </div>
+
+            <div class="form-field">
+              <label for="privasi">Siapa yang boleh membaca?</label>
+              <select id="privasi" name="privasi">
+                <option value="PUBLIK">Publik — tampil setelah disetujui moderator</option>
+                <option value="TERBATAS">Terbatas — hanya saya yang melihat</option>
+              </select>
+            </div>
+
+            <div class="extra-panel" id="laporan-extra" hidden>
+              <p class="extra-title">Untuk laporan formal</p>
+              <div class="form-field">
+                <label for="lembaga">Lembaga tujuan (simulasi)</label>
+                <select id="lembaga" name="lembaga">
+                  <option value="">Pilih lembaga</option>
+                  <option value="satgas">Satgas PPKPT USK</option>
+                  <option value="mitra">Lembaga mitra kampus (simulasi)</option>
+                </select>
+                <div class="field-foot"><small class="error-text" data-error-for="lembaga"></small></div>
+              </div>
+              <div class="form-field check-field">
+                <label class="check-row">
+                  <input type="checkbox" id="persetujuan" name="persetujuan">
+                  <span>
+                    <strong>Saya berikan persetujuan tertulis</strong>
+                    <small>Cerita hanya diteruskan jika saya menyetujui. Data dibagikan sesuai kebijakan privasi.</small>
+                  </span>
+                </label>
+                <div class="field-foot"><small class="error-text" data-error-for="persetujuan"></small></div>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-submit" type="submit">Kirim cerita <span aria-hidden="true">→</span></button>
+            <p class="form-footnote">
+              Dengan mengirim, kamu menyetujui <a href="#aturan">aturan komunitas</a>.
+              Identitas asli tidak akan ditampilkan di antarmuka publik.
+            </p>
+          </form>
+
+          <div class="form-success" id="form-success" hidden role="status">
+            <span class="success-icon" aria-hidden="true">✓</span>
+            <h2>Ceritamu sudah masuk.</h2>
+            <p>
+              Terima kasih sudah mempercayakan ceritamu. Cerita akan ditinjau
+              moderator sebelum tampil di beranda.
+            </p>
+            <p class="success-ref">Kode referensi: <strong id="success-ref">—</strong></p>
+            <div class="hero-actions">
+              <a class="btn btn-outline" href="index.html#cerita">Baca cerita lain</a>
+              <button class="btn btn-ghost" type="button" id="reset-form">Tulis cerita lagi</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="form-aside" id="aturan">
+          <div class="aside-card">
+            <p class="eyebrow">Sebelum kamu kirim</p>
+            <h2>Ruang ini punya aturan.</h2>
+            <ul class="rule-list">
+              <li>Dilarang menyalahkan, merendahkan, atau meragukan pengalaman korban.</li>
+              <li>Jangan sertakan identitas, foto, atau data pribadi siapa pun.</li>
+              <li>Pelanggaran dapat menyebabkan konten dihapus dan akun dibatasi.</li>
+            </ul>
+            <p class="aside-disclaimer">
+              Santuary bukan pengganti layanan psikologis, medis, atau penegakan hukum.
+            </p>
+            <div class="aside-contacts">
+              <span><strong>119 ekst. 8</strong> krisis psikologis</span>
+              <span><strong>SAPA 129</strong> kekerasan &amp; perlindungan</span>
+              <span><strong>Satgas PPKPT USK</strong> pelaporan kampus</span>
+            </div>
+            <button class="quick-exit" type="button" data-quick-exit>Keluar cepat ↗</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <aside class="help-dock" aria-label="Panel bantuan">
+    <details class="help-panel">
+      <summary class="help-trigger">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M10 17s-6-3.7-6-8a3.4 3.4 0 0 1 6-2.1A3.4 3.4 0 0 1 16 9c0 4.3-6 8-6 8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+        <span>Bantuan</span>
+      </summary>
+      <div class="help-card">
+        <p class="help-kicker">Ruang bantuan selalu dekat</p>
+        <h2>Anda tidak harus kuat sendiri.</h2>
+        <ul class="help-list">
+          <li>
+            <span class="help-number">119<small>ekst. 8</small></span>
+            <div><strong>Krisis psikologis</strong><small>Layanan darurat 24 jam</small></div>
+            <a href="tel:119">Hubungi</a>
+          </li>
+          <li>
+            <span class="help-number">129</span>
+            <div><strong>SAPA 129</strong><small>Kekerasan &amp; perlindungan</small></div>
+            <a href="tel:129">Hubungi</a>
+          </li>
+          <li>
+            <span class="help-number help-number-text">USK</span>
+            <div><strong>Satgas PPKPT USK</strong><small>Pelaporan di lingkungan kampus</small></div>
+            <a href="index.html#darurat">Info</a>
+          </li>
+        </ul>
+        <p class="help-disclaimer">
+          Santuary bukan pengganti layanan psikologis, medis, atau penegakan hukum.
+        </p>
+        <button class="help-exit" type="button" data-quick-exit>Keluar cepat ↗</button>
+      </div>
+    </details>
+  </aside>
+
+  <script>
+    document.getElementById('year') && (document.getElementById('year').textContent = new Date().getFullYear());
+    document.querySelectorAll('[data-quick-exit]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        window.location.replace('https://www.google.com');
+      });
+    });
+  </script>
+  <script src="app.js"></script>
+</body>
+</html>
