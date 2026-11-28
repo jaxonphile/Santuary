@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const oracledb = require('oracledb');
 const { mulaiPool, ambilKoneksi } = require('./db');
 
 const app = express();
@@ -466,6 +467,182 @@ app.patch('/api/moderasi/cerita/:id', verifikasiToken, async (req, res) => {
         res.status(500).json({
             status: 'error',
             pesan: 'Gagal melakukan moderasi'
+        });
+    } finally {
+        if (conn) await conn.close();
+    }
+});
+
+app.post('/api/persetujuan', verifikasiToken, async (req, res) => {
+    let conn;
+    try {
+        const ceritaId = req.body.cerita_id ? Number(req.body.cerita_id) : null;
+        const jenis = req.body.jenis_persetujuan || 'PENERUSAN_LEMBAGA';
+
+        if (!ceritaId || !Number.isInteger(ceritaId)) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'cerita_id wajib diisi'
+            });
+        }
+        if (!String(jenis).trim()) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'jenis_persetujuan tidak boleh kosong'
+            });
+        }
+
+        conn = await ambilKoneksi();
+        const cek = await conn.execute(
+            `SELECT id AS "id" FROM cerita
+             WHERE id = :id AND pengguna_id = :pengguna`,
+            { id: ceritaId, pengguna: req.pengguna.id }
+        );
+
+        if (!cek.rows[0]) {
+            return res.status(403).json({
+                status: 'error',
+                pesan: 'Cerita tidak ditemukan atau bukan milik Anda'
+            });
+        }
+
+        const sudah = await conn.execute(
+            `SELECT id AS "id" FROM persetujuan WHERE cerita_id = :id`,
+            { id: ceritaId }
+        );
+
+        if (sudah.rows[0]) {
+            return res.status(409).json({
+                status: 'error',
+                pesan: 'Persetujuan untuk cerita ini sudah ada'
+            });
+        }
+
+        await conn.execute(
+            `INSERT INTO persetujuan (cerita_id, jenis_persetujuan)
+             VALUES (:cerita, :jenis)`,
+            {
+                cerita: ceritaId,
+                jenis: String(jenis).trim().slice(0, 40)
+            },
+            { autoCommit: true }
+        );
+
+        res.status(201).json({
+            status: 'ok',
+            pesan: 'Persetujuan tercatat'
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: 'error',
+            pesan: 'Gagal menyimpan persetujuan'
+        });
+    } finally {
+        if (conn) await conn.close();
+    }
+});
+
+app.post('/api/rujukan', verifikasiToken, async (req, res) => {
+    let conn;
+    try {
+        const ceritaId = req.body.cerita_id ? Number(req.body.cerita_id) : null;
+        const lembagaId = req.body.lembaga_id ? Number(req.body.lembaga_id) : null;
+
+        if (!ceritaId || !lembagaId) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'cerita_id dan lembaga_id wajib diisi'
+            });
+        }
+
+        conn = await ambilKoneksi();
+        const cek = await conn.execute(
+            `SELECT id AS "id" FROM cerita
+             WHERE id = :id AND pengguna_id = :pengguna`,
+            { id: ceritaId, pengguna: req.pengguna.id }
+        );
+
+        if (!cek.rows[0]) {
+            return res.status(403).json({
+                status: 'error',
+                pesan: 'Cerita tidak ditemukan atau bukan milik Anda'
+            });
+        }
+
+        const hasil = await conn.execute(
+            `BEGIN sp_ajukan_laporan(:cerita, :lembaga, :rujukan); END;`,
+            {
+                cerita: ceritaId,
+                lembaga: lembagaId,
+                rujukan: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
+            }
+        );
+
+        await conn.commit();
+
+        res.status(201).json({
+            status: 'ok',
+            pesan: 'Laporan berhasil dirujuk ke lembaga',
+            rujukan_id: hasil.outBinds.rujukan
+        });
+    } catch (err) {
+        if (conn) await conn.rollback();
+
+        if (err.errorNum === 20010) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'Lembaga tidak aktif'
+            });
+        }
+        if (err.errorNum === 20011) {
+            return res.status(400).json({
+                status: 'error',
+                pesan: 'Persetujuan pengguna belum ada'
+            });
+        }
+        if (err.errorNum === 20012) {
+            return res.status(404).json({
+                status: 'error',
+                pesan: 'Lembaga tidak ditemukan'
+            });
+        }
+
+        console.error(err);
+        res.status(500).json({
+            status: 'error',
+            pesan: 'Gagal mengajukan rujukan'
+        });
+    } finally {
+        if (conn) await conn.close();
+    }
+});
+
+app.get('/api/rujukan/saya', verifikasiToken, async (req, res) => {
+    let conn;
+    try {
+        conn = await ambilKoneksi();
+        const hasil = await conn.execute(
+            `SELECT r.id AS "id",
+                    r.cerita_id AS "cerita_id",
+                    c.judul AS "judul",
+                    l.nama_lembaga AS "nama_lembaga",
+                    r.status AS "status",
+                    r.dirujuk_pada AS "dirujuk_pada"
+             FROM rujukan r
+             JOIN cerita c ON c.id = r.cerita_id
+             JOIN lembaga l ON l.id = r.lembaga_id
+             WHERE c.pengguna_id = :pengguna
+             ORDER BY r.dirujuk_pada DESC`,
+            { pengguna: req.pengguna.id }
+        );
+
+        res.status(200).json({ status: 'ok', data: hasil.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            status: 'error',
+            pesan: 'Gagal memuat rujukan'
         });
     } finally {
         if (conn) await conn.close();
